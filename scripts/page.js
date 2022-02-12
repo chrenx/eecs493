@@ -267,12 +267,8 @@ function createThrowingItem(){
   let iterationsLeft = 30 - Math.round(item_speed);
   console.log(iterationsLeft);
 
-  setInterval(function(iterationsLeft) {
-    if (iterationsLeft === 0) {
-      console.log("item reaches destination");
-    } else {
-      iterationsLeft = updateThrownItemPosition(currItem, xChange, yChange, iterationsLeft);
-    }
+  setInterval(function() {
+    updateThrownItemPosition(currItem, xChange, yChange, iterationsLeft);
   }, OBJECT_REFRESH_RATE);
 }
 
@@ -289,6 +285,9 @@ function createItemDivString(itemIndex, type, imageString){
 // If the item is at it's final postion, start removing it.
 function updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft){
   // TODO
+  if (iterationsLeft === 0) {
+    return;
+  }
   if (!willCollide(elementObj, $('.game-window'), xChange, yChange)) {
     elementObj.css("left", parseInt(elementObj.css("left")) + xChange);
     elementObj.css("top", parseInt(elementObj.css("top")) + yChange)
