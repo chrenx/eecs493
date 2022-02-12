@@ -267,8 +267,11 @@ function createThrowingItem(){
   let iterationsLeft = 30 - Math.round(item_speed);
   console.log(iterationsLeft);
 
-  setInterval(function() {
+  // run recursively
+  setTimeout(function throwing() {
     updateThrownItemPosition(currItem, xChange, yChange, iterationsLeft);
+    iterationsLeft--;
+    setTimeout(throwing, OBJECT_REFRESH_RATE);
   }, OBJECT_REFRESH_RATE);
 }
 
@@ -293,10 +296,9 @@ function updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft){
     elementObj.css("left", parseInt(elementObj.css("left")) + xChange);
     elementObj.css("top", parseInt(elementObj.css("top")) + yChange)
     iterationsLeft--;
-    console.log("recursion................");
-    updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft);
+    console.log("moving................");
   } else {
-    console.log("finish recursion");
+    console.log("hit the wall: finish recursion");
     return;
   }
 }
