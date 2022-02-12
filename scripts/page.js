@@ -286,14 +286,19 @@ function createItemDivString(itemIndex, type, imageString){
 function updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft){
   // TODO
   if (iterationsLeft === 0) {
+    console.log("finish recursion");
     return;
   }
   if (!willCollide(elementObj, $('.game-window'), xChange, yChange)) {
     elementObj.css("left", parseInt(elementObj.css("left")) + xChange);
     elementObj.css("top", parseInt(elementObj.css("top")) + yChange)
-    return (iterationsLeft--);
+    iterationsLeft--;
+    console.log("recursion................");
+    updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft);
+  } else {
+    console.log("finish recursion");
+    return;
   }
-  return 0;
 }
 
 function graduallyFadeAndRemoveElement(elementObj){
