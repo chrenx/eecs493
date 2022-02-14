@@ -1,4 +1,6 @@
-
+body {
+  caret-color: transparent;
+}
 /* Main Containers */
 .outer-container {
   height: 600px;
@@ -67,6 +69,7 @@
   width: 100%;
   text-align: center;
   top: 250px;
+  cursor: none;
 }
 
 #settings-panel {
@@ -74,9 +77,22 @@
   position: relative;
 }
 
+.setting-box {
+  top: 20px;
+  position: relative;
+  border: 1px solid gray;
+}
+
+#save-and-close {
+  position: relative;
+}
+
+#discard-and-close {
+  position: relative;
+}
+
 #panel {
   position: relative;
-  top: 20px;
 }
 
 .throwingItem {
@@ -91,4 +107,8 @@
 .candy img {
   width: 46px;
   height: 40px;
+}
+
+#paneltext {
+  caret-color: black;
 }

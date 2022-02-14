@@ -51,6 +51,7 @@ const KEYS = {
 let createThrowingItemIntervalHandle;
 let currentThrowingFrequency = 2000;
 
+let settingsPanel = "<button id='settings-panel' onclick='openSettingsPanel()'>Open settings panel</button>";
 
 // ==============================================
 // ============ Functional Code Here ============
@@ -61,23 +62,30 @@ $(document).ready( function() {
   console.log("Ready!");
 
   // TODO: Event handlers for the settings panel
-  var settingsPanel = "<button id='settings-panel'>Open settings panel</button>"
+  // var settingsPanel = "<button id='settings-panel'>Open settings panel</button>"
   $('.status-window').append(settingsPanel);
-  $('#settings-panel').click(openSettingsPanel);
+  // $('#settings-panel').click(openSettingsPanel);
 
+  // document.getElementById('player').style.display = 'none';
+  // document.getElementById('paradeRoute').style.display = 'none';
 
   // TODO: Add a splash screen and delay starting the game
   var splashScreen = "<div id='splash-screen'>Mardi Gras Parade!</div>"
   $('.game-window').append(splashScreen);
+
   setTimeout( function() {
     console.log("splash screen disappear");
     $('#splash-screen').remove();
     $('#actualGame').show();
+
+    // document.getElementById('player').style.display = 'inline-block';
+    // document.getElementById('paradeRoute').style.display = 'block';
+
     $(window).keydown(keydownRouter);
     console.log("pressing key is allowed now");
     startParade();
     console.log("actual game shows up");
-    // createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+    createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
   }, 3000);
 
 
@@ -113,15 +121,41 @@ $(document).ready( function() {
   // startParade();
 
   // Throw items onto the route at the specified frequency
-  createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+  // createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
 });
 
 
 // When user clicks the button, open the setting panel
 function openSettingsPanel() {
   // TODO: open the settings panel
-  var panel = "<div id='panel'>Item thrown from parade float every</div>"
-  $('#settings-panel').replaceWith(panel);
+  let changeBox = "<div class='setting-box'></div>"
+  let panel = "<div id='panel'>Item thrown from parade float every <input id='paneltext' type='text' value='" + currentThrowingFrequency + "'> milliseconds (min allowed value: 100)</div>"
+  $('#settings-panel').replaceWith(changeBox);
+  $('.setting-box').append(panel);
+
+  let saveAndClose = "<button id='save-and-close'>Save and close settings panel</button>";
+  $('.setting-box').append(saveAndClose);
+  $('#save-and-close').click(() => {
+    let inputValue = document.getElementById("paneltext").value;
+    console.log("frequency of throwing has changed: " + inputValue);
+    if (isNaN(inputValue) || inputValue < 100) {
+      alert("Frequency must be a number greater than or equal to 100");
+    } else {
+      currentThrowingFrequency = inputValue;
+      clearInterval(createThrowingItemIntervalHandle);
+      createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+      $('.setting-box').replaceWith(settingsPanel);
+    }
+    
+  });
+
+  let discard = "<button id='discard-and-close'>Discard and close settings panel</button>";
+  $('.setting-box').append(discard);
+  $('#discard-and-close').click(() => {
+    $('.setting-box').replaceWith(settingsPanel);
+  });
+  
+  // currentThrowingFrequency = inputValue;
 }
 
 
@@ -155,6 +189,12 @@ function movePerson(arrow) {
       if (newPos < 0) {
         newPos = 0;
       }
+      if (willCollide(player, paradeFloat1, -PERSON_SPEED, 0)) {
+        newPos = parseInt(player.css('left'));
+      }
+      if (willCollide(player, paradeFloat2, -PERSON_SPEED, 0)) {
+        newPos = parseInt(player.css('left'));
+      }
       player.css('left', newPos);
       break;
     }
@@ -162,6 +202,12 @@ function movePerson(arrow) {
       let newPos = parseInt(player.css('left'))+PERSON_SPEED;
       if (newPos > maxPersonPosX) {
         newPos = maxPersonPosX;
+      }
+      if (willCollide(player, paradeFloat1, PERSON_SPEED, 0)) {
+        newPos = parseInt(player.css('left'));
+      }
+      if (willCollide(player, paradeFloat2, PERSON_SPEED, 0)) {
+        newPos = parseInt(player.css('left'));
       }
       player.css('left', newPos);
       break;
@@ -171,6 +217,12 @@ function movePerson(arrow) {
       if (newPos < 0) {
         newPos = 0;
       }
+      if (willCollide(player, paradeFloat1, 0, -PERSON_SPEED)) {
+        newPos = parseInt(player.css('top'));
+      }
+      if (willCollide(player, paradeFloat2, 0, -PERSON_SPEED)) {
+        newPos = parseInt(player.css('top'));
+      }
       player.css('top', newPos);
       break;
     }
@@ -178,6 +230,12 @@ function movePerson(arrow) {
       let newPos = parseInt(player.css('top'))+PERSON_SPEED;
       if (newPos > maxPersonPosY) {
         newPos = maxPersonPosY;
+      }
+      if (willCollide(player, paradeFloat1, 0, PERSON_SPEED)) {
+        newPos = parseInt(player.css('top'));
+      }
+      if (willCollide(player, paradeFloat2, 0, PERSON_SPEED)) {
+        newPos = parseInt(player.css('top'));
       }
       player.css('top', newPos);
       break;
@@ -227,7 +285,7 @@ function startParade(){
 function createThrowingItem(){
   // TODO
   let newPosFront2 = parseInt(paradeFloat2.css("left")) + paradeFloat2.width();
-  let rightBoard = parseInt($(".game-window").css("left")) + $(".game-window").width() + 10;
+  let rightBoard = parseInt($(".game-window").css("left")) + $(".game-window").width();
   if (newPosFront2 > rightBoard) {
     return;
   }
@@ -248,8 +306,8 @@ function createThrowingItem(){
   currItem.css("top", parseInt($("#paradeRoute").css("top")) + 40);
   currItem.css("left", parseInt(paradeFloat2.css("left")) + (paradeFloat2.width() * 3 / 4));
 
-  let finalX = getRandomNumber(0, $(".game-window").width());
-  let finalY = getRandomNumber(80, 500);
+  let finalX = Math.round(getRandomNumber(0, $(".game-window").width()));
+  let finalY = Math.round(getRandomNumber(80, 500));
 
   console.log("item destionation: " + finalX + ", " + finalY);
 
@@ -267,12 +325,14 @@ function createThrowingItem(){
   let iterationsLeft = 30 - Math.round(item_speed);
   console.log(iterationsLeft);
 
+  console.log("x change: " + xChange + ", yChange: " + yChange);
+  updateThrownItemPosition(currItem, xChange, yChange, iterationsLeft);
   // run recursively
-  setTimeout(function throwing() {
-    updateThrownItemPosition(currItem, xChange, yChange, iterationsLeft);
-    iterationsLeft--;
-    setTimeout(throwing, OBJECT_REFRESH_RATE);
-  }, OBJECT_REFRESH_RATE);
+  // setTimeout(function throwing() {
+  //   console.log("kkkkkkkkkkkkkkk: " + finalX);
+  //   updateThrownItemPosition(currItem, xChange, yChange, iterationsLeft);
+  //   iterationsLeft--;
+  // }, OBJECT_REFRESH_RATE);
 }
 
 // Helper function for creating items
@@ -290,17 +350,52 @@ function updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft){
   // TODO
   if (iterationsLeft === 0) {
     console.log("finish recursion");
+    setTimeout(graduallyFadeAndRemoveElement, 5000, elementObj);
+    let scoreInterval = setInterval(function() {
+      if(isColliding(elementObj, player)) {
+        console.log("player gets the score.");
+        let scoreboard = document.getElementById("score-box");
+        scoreboard.innerHTML = parseInt(scoreboard.innerHTML) + 100;
+        
+        elementObj.css("border-radius", "100%");
+        elementObj.css("backgroundColor", "yellow");
+
+        let beadscounter = document.getElementById("beadsCounter");
+        let candycounter = document.getElementById("candyCounter");
+
+        if (document.getElementById(elementObj.attr('id')).classList.contains("beads")) {
+          beadscounter.innerHTML = parseInt(beadscounter.innerHTML) + 1;
+        } else {
+          candycounter.innerHTML = parseInt(candycounter.innerHTML) + 1;
+        }
+
+
+        elementObj.fadeTo(1000, 0, function(){
+          $(this).remove();
+        });
+
+        clearInterval(scoreInterval);
+      }
+    }, 100);
     return;
   }
-  if (!willCollide(elementObj, $('.game-window'), xChange, yChange)) {
-    elementObj.css("left", parseInt(elementObj.css("left")) + xChange);
-    elementObj.css("top", parseInt(elementObj.css("top")) + yChange)
-    iterationsLeft--;
-    console.log("moving................");
-  } else {
-    console.log("hit the wall: finish recursion");
-    return;
-  }
+
+  elementObj.css("left", parseInt(elementObj.css("left")) + xChange);
+  elementObj.css("top", parseInt(elementObj.css("top")) + yChange);
+  iterationsLeft--;
+  console.log("moving................");
+  setTimeout(updateThrownItemPosition, OBJECT_REFRESH_RATE, elementObj, xChange, yChange, iterationsLeft);
+
+  // if (!willCollide(elementObj, $('.game-window'), 1, 1)) {
+  //   elementObj.css("left", parseInt(elementObj.css("left")) + xChange);
+  //   elementObj.css("top", parseInt(elementObj.css("top")) + yChange);
+  //   iterationsLeft--;
+  //   console.log("moving................");
+  //   setTimeout(updateThrownItemPosition, OBJECT_REFRESH_RATE, elementObj, xChange, yChange, iterationsLeft);
+  // } else {
+  //   console.log("hit the wall: finish recursion");
+  //   return;
+  // }
 }
 
 function graduallyFadeAndRemoveElement(elementObj){
