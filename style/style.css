@@ -112,3 +112,34 @@ body {
 #paneltext {
   caret-color: black;
 }
+
+#startGame, #gameOver {
+  color: blue;
+  padding: 5px;
+  position: absolute;
+  width: 30%;
+  text-align: center;
+  top: 50%;
+  left: 50%;  
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+#gameOverResult {
+  opacity: 0;
+  color: blue;
+  padding: 5px;
+  position: absolute;
+  width: 40%;
+  font-size: 50px;
+  text-align: center;
+  top: 30%;
+  left: 50%;  
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+#high-score {
+  top: 50px;
+  position: relative;
+}

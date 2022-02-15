@@ -52,6 +52,11 @@ let createThrowingItemIntervalHandle;
 let currentThrowingFrequency = 2000;
 
 let settingsPanel = "<button id='settings-panel' onclick='openSettingsPanel()'>Open settings panel</button>";
+let startGameBtn = "<button id='startGame' onclick='startGame()'>Start Game</button>";
+
+let highestScore = 0;
+
+let highestScoreInfo = "<div id='high-score'>Highest Score So far: " + highestScore + "</div>";
 
 // ==============================================
 // ============ Functional Code Here ============
@@ -64,6 +69,7 @@ $(document).ready( function() {
   // TODO: Event handlers for the settings panel
   // var settingsPanel = "<button id='settings-panel'>Open settings panel</button>"
   $('.status-window').append(settingsPanel);
+  $('.status-window').append(highestScoreInfo);
   // $('#settings-panel').click(openSettingsPanel);
 
   // document.getElementById('player').style.display = 'none';
@@ -76,16 +82,16 @@ $(document).ready( function() {
   setTimeout( function() {
     console.log("splash screen disappear");
     $('#splash-screen').remove();
-    $('#actualGame').show();
 
-    // document.getElementById('player').style.display = 'inline-block';
-    // document.getElementById('paradeRoute').style.display = 'block';
+    let startGame = "<button id='startGame' onclick='startGame()'>Start Game</button>";
+    $('.game-window').append(startGameBtn);
 
-    $(window).keydown(keydownRouter);
-    console.log("pressing key is allowed now");
-    startParade();
-    console.log("actual game shows up");
-    createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+    // $('#actualGame').show();
+    // $(window).keydown(keydownRouter);
+    // console.log("pressing key is allowed now");
+    // startParade();
+    // console.log("actual game shows up");
+    // createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
   }, 3000);
 
 
@@ -123,6 +129,74 @@ $(document).ready( function() {
   // Throw items onto the route at the specified frequency
   // createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
 });
+
+
+function startGame() {
+  $('#startGame').remove();
+  $('#actualGame').show();
+  $(window).keydown(keydownRouter);
+  console.log("pressing key is allowed now");
+  startParade();
+  console.log("actual game shows up");
+  $('#gameOverResult').remove();
+  
+  createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+
+}
+
+function restartGame() {
+
+  clearInterval(createThrowingItemIntervalHandle);
+  clearInterval(paradeTimer);
+  $(window).off("keydown");
+  let gameOverResult = "<div id='gameOverResult'>Game Over</div>";
+  $('.game-window').append(gameOverResult);
+
+  let restartBtn = "<button id='gameOver' onclick='resetGame()'>Restart Game</button>";
+
+  let currentScore = parseInt(document.getElementById("score-box").innerHTML);
+  if (currentScore > highestScore) {
+    highestScore = currentScore;
+    let maxScore = document.getElementById("high-score");
+    maxScore.innerHTML = "Highest Score So far: " + highestScore;
+  }
+
+  $('#gameOverResult').fadeTo(1000, 1,() => {
+    $('.game-window').append(restartBtn);
+  });
+  
+}
+
+function resetGame() {
+  const allItems = document.querySelectorAll('.throwingItem');
+  allItems.forEach(item => {
+    item.remove();
+  });
+
+  let beadscounter = document.getElementById("beadsCounter");
+  let candycounter = document.getElementById("candyCounter");
+
+  beadscounter.innerHTML = 0;
+  candycounter.innerHTML = 0;
+
+  $('#gameOver').remove();
+  $('#gameOverResult').remove();
+  $(window).keydown(keydownRouter);
+  clearInterval(paradeTimer);
+  player.css("top", 530);
+  player.css("left", 122);
+  paradeFloat1.css("left", -300);
+  paradeFloat2.css("left", -150);
+  currentThrowingFrequency = 2000;
+  startParade();
+  let scoreboard = document.getElementById("score-box");
+  let currentScore = parseInt(scoreboard.innerHTML);
+  if (currentScore > highestScore) {
+    highestScore = currentScore;
+  }
+  scoreboard.innerHTML = 0;
+  createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+}
 
 
 // When user clicks the button, open the setting panel
@@ -277,9 +351,14 @@ function startParade(){
 
         paradeFloat1.css("left", newPosEnd1);
         paradeFloat2.css("left", newPosEnd2);
+      } else {
+        // Game over
+        restartGame();
       }
+
   }, OBJECT_REFRESH_RATE);
 }
+
 
 // Get random position to throw object to, create the item, begin throwing
 function createThrowingItem(){
